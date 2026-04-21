@@ -10,6 +10,7 @@ namespace CcLauncher.App;
 public partial class App : Application
 {
     private Dashboard? _dashboard;
+    private Views.Settings? _settingsWindow;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -29,6 +30,16 @@ public partial class App : Application
         if (_dashboard is null) return;
         _dashboard.Show();
         _dashboard.Activate();
+    }
+
+    private void OnOpenSettings(object? sender, EventArgs e)
+    {
+        if (_settingsWindow is null || !_settingsWindow.IsVisible)
+        {
+            _settingsWindow = new Views.Settings();
+            _settingsWindow.Show();
+        }
+        else _settingsWindow.Activate();
     }
 
     private void OnQuit(object? sender, EventArgs e)

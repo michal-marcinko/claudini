@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:CcLauncher.App.ViewModels"
+        x:Class="CcLauncher.App.Views.Settings"
+        x:DataType="vm:SettingsViewModel"
+        Width="520" Height="420" Title="cc-launcher settings">
+  <StackPanel Margin="16" Spacing="10">
+    <TextBlock Text="Terminal command" FontWeight="SemiBold" />
+    <TextBox Text="{Binding TerminalCommand}" />
+
+    <TextBlock Text="Global default CLI args" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <TextBox Text="{Binding GlobalDefaultArgs}" Watermark="e.g. --model opus" />
+
+    <TextBlock Text="Global system prompt (appended)" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <TextBox Text="{Binding GlobalSystemPrompt}" AcceptsReturn="True" Height="80" />
+
+    <CheckBox Content="Launch on OS startup" IsChecked="{Binding LaunchOnStartup}" />
+    <CheckBox Content="Close dashboard after launching" IsChecked="{Binding CloseOnLaunch}" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+      <Button Content="Cancel" Click="Cancel_Click" />
+      <Button Content="Save"   Click="Save_Click" Classes="accent" />
+    </StackPanel>
+  </StackPanel>
+</Window>
