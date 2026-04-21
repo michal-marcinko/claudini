@@ -60,6 +60,7 @@ public sealed partial class DashboardViewModel : ObservableObject
         else
         {
             LastError = $"Launch failed: {result.Error}";
+            CcLauncher.Core.Logging.FileLog.Error($"Launch failed for {row.Id}: {result.Error} (cmd: {result.ResolvedCommandLine})");
         }
         return result;
     }
@@ -71,9 +72,14 @@ public sealed partial class DashboardViewModel : ObservableObject
         var req = new LaunchRequest(row.Project.Cwd, global.TerminalCommand, args);
         var result = _launcher.Launch(req);
         if (result.Success)
+        {
             _config.SaveProjectSettings(row.Settings with { LastLaunchedAt = DateTime.UtcNow });
+        }
         else
+        {
             LastError = $"Launch failed: {result.Error}";
+            CcLauncher.Core.Logging.FileLog.Error($"Launch failed for {row.Id}: {result.Error} (cmd: {result.ResolvedCommandLine})");
+        }
         return result;
     }
 
