@@ -22,11 +22,9 @@ public sealed class ProjectDiscoveryService : IProjectDiscoveryService
         var results = new List<DiscoveredProject>();
         foreach (var projDir in Directory.EnumerateDirectories(_projectsRoot))
         {
-            DiscoveredProject? p;
-            try { p = ReadProject(projDir); }
+            try { results.Add(ReadProject(projDir)); }
             catch (UnauthorizedAccessException) { continue; }
             catch (IOException) { continue; }
-            if (p is not null) results.Add(p);
         }
 
         return results
@@ -34,7 +32,7 @@ public sealed class ProjectDiscoveryService : IProjectDiscoveryService
             .ToList();
     }
 
-    private DiscoveredProject? ReadProject(string projDir)
+    private DiscoveredProject ReadProject(string projDir)
     {
         var id = Path.GetFileName(projDir);
         var sessions = new List<DiscoveredSession>();
@@ -66,6 +64,6 @@ public sealed class ProjectDiscoveryService : IProjectDiscoveryService
             using var doc = JsonDocument.Parse(line);
             return doc.RootElement.TryGetProperty("cwd", out var c) ? c.GetString() : null;
         }
-        catch { return null; }
+        catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException) { return null; }
     }
 }

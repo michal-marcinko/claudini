@@ -12,7 +12,7 @@ public static class LauncherFactory
     }
 
     // Same mapping, but kept explicit so tests can be clear about intent.
-    public static ILauncher ForTesting(string stubPath) => ForCurrentOs();
+    public static ILauncher ForTesting() => ForCurrentOs();
 
     public static string DefaultTerminalCommand()
     {

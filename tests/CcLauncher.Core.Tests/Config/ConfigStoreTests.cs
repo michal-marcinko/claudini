@@ -80,4 +80,53 @@ public class ConfigStoreTests
         var id = store.InsertLaunch("-proj", "session-1", 1234);
         id.Should().BeGreaterThan(0);
     }
+
+    [Fact]
+    public void GetRecentLaunches_OrdersByLaunchedAtDescending_AndRespectsLimit()
+    {
+        var store = CreateStore();
+
+        // Three inserts with distinct launched_at timestamps.
+        // InsertLaunch stamps launched_at = DateTime.UtcNow; sleep briefly between calls
+        // to guarantee strict monotonic ordering at the column's serialized precision.
+        store.InsertLaunch("-proj", "session-1", 1);
+        Thread.Sleep(50);
+        store.InsertLaunch("-proj", "session-2", 2);
+        Thread.Sleep(50);
+        store.InsertLaunch("-proj", "session-3", 3);
+
+        var recent = store.GetRecentLaunches(take: 2);
+
+        recent.Should().HaveCount(2);
+        recent[0].SessionId.Should().Be("session-3");
+        recent[1].SessionId.Should().Be("session-2");
+        (recent[0].LaunchedAt >= recent[1].LaunchedAt).Should().BeTrue("results should be ordered newest first");
+    }
+
+    [Fact]
+    public void SaveGlobalSettings_OverwritesExistingValues_OnConflict()
+    {
+        var store = CreateStore();
+
+        var settings1 = new GlobalSettings(
+            TerminalCommand: "term-1",
+            GlobalDefaultArgs: "--first",
+            GlobalSystemPrompt: "prompt-1",
+            LaunchOnStartup: false,
+            ResumeAllOnOpen: false,
+            CloseOnLaunch: true);
+
+        var settings2 = new GlobalSettings(
+            TerminalCommand: "term-2",
+            GlobalDefaultArgs: "--second",
+            GlobalSystemPrompt: "prompt-2",
+            LaunchOnStartup: true,
+            ResumeAllOnOpen: true,
+            CloseOnLaunch: false);
+
+        store.SaveGlobalSettings(settings1);
+        store.SaveGlobalSettings(settings2);
+
+        store.GetGlobalSettings().Equals(settings2).Should().BeTrue("second save should overwrite the first via ON CONFLICT DO UPDATE");
+    }
 }

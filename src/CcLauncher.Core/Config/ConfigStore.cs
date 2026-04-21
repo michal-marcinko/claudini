@@ -16,7 +16,8 @@ public sealed class ConfigStore : IConfigStore, IDisposable
 
     public static ConfigStore OpenFile(string path, string platformTerminal)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
         var conn = new SqliteConnection($"Data Source={path}");
         conn.Open();
         return new ConfigStore(conn, platformTerminal);

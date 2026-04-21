@@ -45,7 +45,7 @@ public class LauncherIntegrationTests : IDisposable
     [Fact]
     public void Launch_Synchronously_CapturesArgsAndCwd()
     {
-        var launcher = LauncherFactory.ForTesting(_stubPath);
+        var launcher = LauncherFactory.ForTesting();
         var req = new LaunchRequest(
             Cwd: _tempDir,
             TerminalCommand: _stubPath, // overridden for test
