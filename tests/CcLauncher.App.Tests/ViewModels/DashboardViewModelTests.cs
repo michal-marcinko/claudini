@@ -137,6 +137,42 @@ public class DashboardViewModelTests
     }
 
     [Fact]
+    public void Refresh_GroupsPinnedAndRecentIntoSeparateCollections()
+    {
+        var disc = new FakeDiscovery
+        {
+            Projects = new[]
+            {
+                P("-a", "/a", new DateTime(2026, 4, 10, 0, 0, 0, DateTimeKind.Utc)),
+                P("-b", "/b", new DateTime(2026, 4, 20, 0, 0, 0, DateTimeKind.Utc)),
+                P("-c", "/c", new DateTime(2026, 4, 1,  0, 0, 0, DateTimeKind.Utc)),
+            },
+        };
+        var cfg = new FakeConfig();
+        cfg.Settings["-a"] = ProjectSettings.Default("-a") with { Pinned = true };
+        var vm = new DashboardViewModel(disc, cfg, new FakeLauncher());
+
+        vm.Refresh();
+
+        vm.PinnedRows.Select(r => r.Id).Should().ContainInOrder("-a");
+        vm.RecentRows.Select(r => r.Id).Should().ContainInOrder("-b", "-c");
+        vm.HasPinned.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Refresh_NoPinned_LeavesHasPinnedFalse()
+    {
+        var disc = new FakeDiscovery { Projects = new[] { P("-a", "/a", DateTime.UtcNow) } };
+        var vm = new DashboardViewModel(disc, new FakeConfig(), new FakeLauncher());
+
+        vm.Refresh();
+
+        vm.HasPinned.Should().BeFalse();
+        vm.PinnedRows.Should().BeEmpty();
+        vm.RecentRows.Should().HaveCount(1);
+    }
+
+    [Fact]
     public void Rename_UpdatesDisplayName_AndPersists()
     {
         var disc = new FakeDiscovery

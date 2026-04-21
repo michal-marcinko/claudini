@@ -23,13 +23,20 @@ public sealed partial class DashboardViewModel : ObservableObject
     }
 
     public ObservableCollection<ProjectRowViewModel> Rows { get; } = new();
+    public ObservableCollection<ProjectRowViewModel> PinnedRows { get; } = new();
+    public ObservableCollection<ProjectRowViewModel> RecentRows { get; } = new();
 
     [ObservableProperty]
     private string? _lastError;
 
+    [ObservableProperty]
+    private bool _hasPinned;
+
     public void Refresh()
     {
         Rows.Clear();
+        PinnedRows.Clear();
+        RecentRows.Clear();
         var settings = _config.GetAllProjectSettings();
 
         var projects = _discovery.Scan()
@@ -38,9 +45,16 @@ public sealed partial class DashboardViewModel : ObservableObject
                 p,
                 settings.TryGetValue(p.Id, out var s) ? s : ProjectSettings.Default(p.Id)))
             .OrderByDescending(r => r.Pinned)
-            .ThenByDescending(r => r.LastActivity);
+            .ThenByDescending(r => r.LastActivity)
+            .ToList();
 
-        foreach (var r in projects) Rows.Add(r);
+        foreach (var r in projects)
+        {
+            Rows.Add(r);
+            if (r.Pinned) PinnedRows.Add(r);
+            else          RecentRows.Add(r);
+        }
+        HasPinned = PinnedRows.Count > 0;
     }
 
     public LaunchResult LaunchProject(ProjectRowViewModel row, string? sessionId)
