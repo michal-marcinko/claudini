@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using CcLauncher.App.Services;
 using CcLauncher.App.Views;
 
 namespace CcLauncher.App;
@@ -21,6 +23,7 @@ public partial class App : Application
             _dashboard = new Dashboard();
             desktop.MainWindow = _dashboard;
             _dashboard.Hide();
+            desktop.ShutdownRequested += (_, _) => AppServices.Dispose();
         }
         base.OnFrameworkInitializationCompleted();
     }
@@ -30,6 +33,12 @@ public partial class App : Application
         if (_dashboard is null) return;
         _dashboard.Show();
         _dashboard.Activate();
+    }
+
+    private void OnResumeLast(object? sender, EventArgs e)
+    {
+        if (_dashboard is null) return;
+        _dashboard.ResumeMostRecent();
     }
 
     private void OnOpenSettings(object? sender, EventArgs e)

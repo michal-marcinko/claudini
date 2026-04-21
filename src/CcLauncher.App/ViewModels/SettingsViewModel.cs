@@ -1,4 +1,5 @@
 using CcLauncher.Core.Config;
+using CcLauncher.Core.Launch;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CcLauncher.App.ViewModels;
@@ -27,7 +28,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     public void Save()
     {
         _config.SaveGlobalSettings(new GlobalSettings(
-            TerminalCommand:    string.IsNullOrWhiteSpace(TerminalCommand) ? "wt.exe" : TerminalCommand,
+            TerminalCommand:    string.IsNullOrWhiteSpace(TerminalCommand) ? LauncherFactory.DefaultTerminalCommand() : TerminalCommand,
             GlobalDefaultArgs:  string.IsNullOrWhiteSpace(GlobalDefaultArgs) ? null : GlobalDefaultArgs,
             GlobalSystemPrompt: string.IsNullOrWhiteSpace(GlobalSystemPrompt) ? null : GlobalSystemPrompt,
             LaunchOnStartup:    LaunchOnStartup,

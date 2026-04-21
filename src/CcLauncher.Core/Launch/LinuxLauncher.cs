@@ -26,6 +26,9 @@ public sealed class LinuxLauncher : ILauncher
         }
 
         // Real path: x-terminal-emulator -e bash -c "cd <cwd>; claude <args>; exec bash"
+        // TODO: EscapeShell wraps each arg in single quotes which is POSIX-safe, but the
+        // composed `inner` string is passed as a single argv to `bash -c`. Cwd flows from
+        // Claude Code's own JSONL and args are model-validated, so safe in practice today.
         var claudeLine = "claude " + string.Join(' ', request.ClaudeArgs.Select(EscapeShell));
         var inner = $"cd {EscapeShell(request.Cwd)}; {claudeLine}; exec bash";
         var psi2 = new ProcessStartInfo(request.TerminalCommand)

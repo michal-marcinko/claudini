@@ -11,6 +11,7 @@
         <TrayIcon.Menu>
           <NativeMenu>
             <NativeMenuItem Header="Open" Click="OnOpenDashboard" />
+            <NativeMenuItem Header="Resume last" Click="OnResumeLast" />
             <NativeMenuItem Header="Settings..." Click="OnOpenSettings" />
             <NativeMenuItemSeparator />
             <NativeMenuItem Header="Quit" Click="OnQuit" />

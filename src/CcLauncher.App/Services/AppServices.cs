@@ -49,4 +49,13 @@ public static class AppServices
             }
         }
     }
+
+    public static void Dispose()
+    {
+        lock (_lock)
+        {
+            (_config as System.IDisposable)?.Dispose();
+            _config = null;
+        }
+    }
 }

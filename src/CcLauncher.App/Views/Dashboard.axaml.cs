@@ -27,6 +27,14 @@ public partial class Dashboard : Window
         Closed += (_, _) => { _watcher?.Dispose(); _watcher = null; };
     }
 
+    public void ResumeMostRecent()
+    {
+        _vm.Refresh();
+        var row = _vm.Rows.FirstOrDefault();
+        if (row is null) return;
+        _vm.LaunchProject(row, sessionId: null);
+    }
+
     private void ProjectRow_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is Control c && c.Tag is ProjectRowViewModel row)

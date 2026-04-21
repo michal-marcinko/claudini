@@ -6,7 +6,7 @@
 
 **Architecture:** Two-project solution. `CcLauncher.Core` is a pure-logic class library (discovery, config, launcher, arg building) with no UI dependency — fully unit-testable. `CcLauncher.App` is the Avalonia executable (tray, views, view-models) that consumes `Core` via constructor injection.
 
-**Tech Stack:** .NET 8, Avalonia 12, CommunityToolkit.Mvvm (for `ObservableObject` / `RelayCommand`), Microsoft.Data.Sqlite, xUnit, FluentAssertions.
+**Tech Stack:** .NET 9, Avalonia 11, CommunityToolkit.Mvvm (for `ObservableObject` / `RelayCommand`), Microsoft.Data.Sqlite, xUnit, FluentAssertions.
 
 **Spec:** `docs/superpowers/specs/2026-04-21-claude-code-launcher-design.md`
 

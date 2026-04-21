@@ -27,6 +27,9 @@ public sealed class MacLauncher : ILauncher
         }
 
         // Real path: osascript tell Terminal.app
+        // TODO: the AppleScript literal passed to `do script` is double-quoted; EscapeShell
+        // handles single-quote/POSIX-shell escaping but a `"` in Cwd or args would break the
+        // outer AppleScript string. Cwd flows from Claude Code's own JSONL, so safe today.
         var claudeLine = "claude " + string.Join(' ', request.ClaudeArgs.Select(EscapeShell));
         var script = $"tell application \"Terminal\" to do script \"cd {EscapeShell(request.Cwd)}; {claudeLine}\"";
         var osa = new ProcessStartInfo("osascript")

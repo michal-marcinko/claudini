@@ -34,6 +34,10 @@ public sealed class WindowsLauncher : ILauncher
         else
         {
             // Fallback: PowerShell -NoExit with a cd + claude command.
+            // TODO: the claude-args portion is composed into a single -Command string. Quote()
+            // only wraps space-containing args; embedded '"', ';' or '$' in args would not be
+            // safely escaped. Claude session ids are UUIDs and Cwd flows from Claude Code's own
+            // JSONL (not user-supplied), so this is currently safe in practice.
             var claudeLine = "claude " + string.Join(' ', request.ClaudeArgs.Select(Quote));
             psi = new ProcessStartInfo("powershell.exe")
             {
