@@ -17,6 +17,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _globalSystemPrompt = g.GlobalSystemPrompt ?? "";
         _launchOnStartup = g.LaunchOnStartup;
         _closeOnLaunch = g.CloseOnLaunch;
+        _theme = g.Theme;
     }
 
     [ObservableProperty] private string _terminalCommand = "";
@@ -24,6 +25,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _globalSystemPrompt = "";
     [ObservableProperty] private bool _launchOnStartup;
     [ObservableProperty] private bool _closeOnLaunch;
+    [ObservableProperty] private string _theme = "System";
+
+    public System.Collections.Generic.IReadOnlyList<string> ThemeOptions { get; } =
+        new[] { "System", "Light", "Dark" };
 
     public void Save()
     {
@@ -33,6 +38,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             GlobalSystemPrompt: string.IsNullOrWhiteSpace(GlobalSystemPrompt) ? null : GlobalSystemPrompt,
             LaunchOnStartup:    LaunchOnStartup,
             ResumeAllOnOpen:    false,
-            CloseOnLaunch:      CloseOnLaunch));
+            CloseOnLaunch:      CloseOnLaunch,
+            Theme:              Theme));
     }
 }

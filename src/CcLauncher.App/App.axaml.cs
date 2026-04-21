@@ -20,6 +20,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            ThemeService.Apply(AppServices.Config.GetGlobalSettings().Theme);
             _dashboard = new Dashboard();
             desktop.MainWindow = _dashboard;
             _dashboard.Hide();

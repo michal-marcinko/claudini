@@ -17,6 +17,9 @@
     <CheckBox Content="Launch on OS startup" IsChecked="{Binding LaunchOnStartup}" />
     <CheckBox Content="Close dashboard after launching" IsChecked="{Binding CloseOnLaunch}" />
 
+    <TextBlock Text="Theme" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <ComboBox ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}" />
+
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
       <Button Content="Cancel" Click="Cancel_Click" />
       <Button Content="Save"   Click="Save_Click" Classes="accent" />

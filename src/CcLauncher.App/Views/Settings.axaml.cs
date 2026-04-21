@@ -20,6 +20,7 @@ public partial class Settings : Window
     {
         _vm.Save();
         StartupIntegration.Apply(_vm.LaunchOnStartup);
+        ThemeService.Apply(_vm.Theme);
         Close();
     }
 

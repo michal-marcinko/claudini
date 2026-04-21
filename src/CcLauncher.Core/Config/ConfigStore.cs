@@ -39,7 +39,8 @@ public sealed class ConfigStore : IConfigStore, IDisposable
             GlobalSystemPrompt: kv.GetValueOrDefault("global_system_prompt"),
             LaunchOnStartup:    kv.GetValueOrDefault("launch_on_startup") == "1",
             ResumeAllOnOpen:    kv.GetValueOrDefault("resume_all_on_open") == "1",
-            CloseOnLaunch:      (kv.GetValueOrDefault("close_on_launch") ?? "1") == "1");
+            CloseOnLaunch:      (kv.GetValueOrDefault("close_on_launch") ?? "1") == "1",
+            Theme:              kv.GetValueOrDefault("theme") ?? "System");
     }
 
     public void SaveGlobalSettings(GlobalSettings g)
@@ -50,6 +51,7 @@ public sealed class ConfigStore : IConfigStore, IDisposable
         WriteGlobalKv("launch_on_startup",    g.LaunchOnStartup ? "1" : "0");
         WriteGlobalKv("resume_all_on_open",   g.ResumeAllOnOpen ? "1" : "0");
         WriteGlobalKv("close_on_launch",      g.CloseOnLaunch ? "1" : "0");
+        WriteGlobalKv("theme",                g.Theme);
     }
 
     public ProjectSettings GetProjectSettings(string projectId)

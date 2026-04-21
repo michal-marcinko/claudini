@@ -6,8 +6,9 @@ public sealed record GlobalSettings(
     string? GlobalSystemPrompt,
     bool LaunchOnStartup,
     bool ResumeAllOnOpen,
-    bool CloseOnLaunch)
+    bool CloseOnLaunch,
+    string Theme = "System")
 {
     public static GlobalSettings Defaults(string platformTerminalCommand) =>
-        new(platformTerminalCommand, null, null, false, false, true);
+        new(platformTerminalCommand, null, null, false, false, true, "System");
 }

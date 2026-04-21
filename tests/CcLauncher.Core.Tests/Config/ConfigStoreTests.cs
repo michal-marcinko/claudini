@@ -35,6 +35,22 @@ public class ConfigStoreTests
     }
 
     [Fact]
+    public void GlobalSettings_Theme_DefaultsToSystem()
+    {
+        var store = CreateStore();
+        store.GetGlobalSettings().Theme.Should().Be("System");
+    }
+
+    [Fact]
+    public void GlobalSettings_Theme_Roundtrips()
+    {
+        var store = CreateStore();
+        var settings = GlobalSettings.Defaults("term") with { Theme = "Dark" };
+        store.SaveGlobalSettings(settings);
+        store.GetGlobalSettings().Theme.Should().Be("Dark");
+    }
+
+    [Fact]
     public void ProjectSettings_MissingProject_ReturnsDefault()
     {
         var store = CreateStore();
