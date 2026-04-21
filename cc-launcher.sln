@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A4D578B3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CcLauncher.Core.Tests", "tests\CcLauncher.Core.Tests\CcLauncher.Core.Tests.csproj", "{FDC4F6EF-E905-4945-9A39-257E8B58B267}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CcLauncher.App.Tests", "tests\CcLauncher.App.Tests\CcLauncher.App.Tests.csproj", "{C294FD8D-BDB6-4C30-87D6-56FD08B1DE29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,10 +36,15 @@ Global
 		{FDC4F6EF-E905-4945-9A39-257E8B58B267}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDC4F6EF-E905-4945-9A39-257E8B58B267}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDC4F6EF-E905-4945-9A39-257E8B58B267}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C294FD8D-BDB6-4C30-87D6-56FD08B1DE29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C294FD8D-BDB6-4C30-87D6-56FD08B1DE29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C294FD8D-BDB6-4C30-87D6-56FD08B1DE29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C294FD8D-BDB6-4C30-87D6-56FD08B1DE29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F28BFE14-0C4B-4E25-96A5-9370765B8830} = {538FD5DC-CA9B-45A3-9FBB-E94214E68206}
 		{A7DDFE30-800C-4F12-A5A4-23C057959D22} = {538FD5DC-CA9B-45A3-9FBB-E94214E68206}
 		{FDC4F6EF-E905-4945-9A39-257E8B58B267} = {A4D578B3-85D3-43CE-81B0-2840728B90C0}
+		{C294FD8D-BDB6-4C30-87D6-56FD08B1DE29} = {A4D578B3-85D3-43CE-81B0-2840728B90C0}
 	EndGlobalSection
 EndGlobal
