@@ -4,6 +4,51 @@
   <Application.Styles>
     <FluentTheme />
   </Application.Styles>
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+
+        <!-- LIGHT -->
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="CcWindowBackground" Color="#F8F7F5" />
+          <SolidColorBrush x:Key="CcSurface"          Color="#FFFFFF" />
+          <SolidColorBrush x:Key="CcSurfaceMuted"     Color="#F1EFEC" />
+          <SolidColorBrush x:Key="CcSurfaceHover"     Color="#0F007AFF" Opacity="1" />
+          <SolidColorBrush x:Key="CcBorder"           Color="#1A000000" />
+          <SolidColorBrush x:Key="CcBorderFaint"      Color="#0D000000" />
+          <SolidColorBrush x:Key="CcTextPrimary"      Color="#1D1D1F" />
+          <SolidColorBrush x:Key="CcTextSecondary"    Color="#86868B" />
+          <SolidColorBrush x:Key="CcTextTertiary"     Color="#A8A39D" />
+          <SolidColorBrush x:Key="CcAccent"           Color="#007AFF" />
+          <SolidColorBrush x:Key="CcAccentSoft"       Color="#14007AFF" />
+          <SolidColorBrush x:Key="CcPin"              Color="#FF9500" />
+          <SolidColorBrush x:Key="CcPinHalo"          Color="#30FF9500" />
+          <SolidColorBrush x:Key="CcChevron"          Color="#C7C7CC" />
+        </ResourceDictionary>
+
+        <!-- DARK -->
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="CcWindowBackground" Color="#1C1C1E" />
+          <SolidColorBrush x:Key="CcSurface"          Color="#2C2C2E" />
+          <SolidColorBrush x:Key="CcSurfaceMuted"     Color="#252527" />
+          <SolidColorBrush x:Key="CcSurfaceHover"     Color="#1F0A84FF" />
+          <SolidColorBrush x:Key="CcBorder"           Color="#1FFFFFFF" />
+          <SolidColorBrush x:Key="CcBorderFaint"      Color="#0DFFFFFF" />
+          <SolidColorBrush x:Key="CcTextPrimary"      Color="#F2F2F7" />
+          <SolidColorBrush x:Key="CcTextSecondary"    Color="#8E8E93" />
+          <SolidColorBrush x:Key="CcTextTertiary"     Color="#6D6D72" />
+          <SolidColorBrush x:Key="CcAccent"           Color="#0A84FF" />
+          <SolidColorBrush x:Key="CcAccentSoft"       Color="#260A84FF" />
+          <SolidColorBrush x:Key="CcPin"              Color="#FF9F0A" />
+          <SolidColorBrush x:Key="CcPinHalo"          Color="#33FF9F0A" />
+          <SolidColorBrush x:Key="CcChevron"          Color="#48484A" />
+        </ResourceDictionary>
+
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
   <TrayIcon.Icons>
     <TrayIcons>
       <TrayIcon Icon="/Assets/tray.ico"

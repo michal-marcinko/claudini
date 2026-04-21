@@ -3,41 +3,173 @@
         xmlns:vm="clr-namespace:CcLauncher.App.ViewModels"
         x:Class="CcLauncher.App.Views.Dashboard"
         x:DataType="vm:DashboardViewModel"
-        Width="480" Height="640"
+        Width="440" Height="640"
         ShowInTaskbar="False"
         WindowStartupLocation="Manual"
+        TransparencyLevelHint="Mica,AcrylicBlur,None"
+        Background="{DynamicResource CcWindowBackground}"
         Title="cc-launcher">
-  <Grid RowDefinitions="*">
-    <ScrollViewer Grid.Row="0" Margin="12">
-      <ItemsControl ItemsSource="{Binding Rows}">
+
+  <Window.Styles>
+    <!-- Section header ("Pinned", "Recent") -->
+    <Style Selector="TextBlock.section">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextTertiary}" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Margin" Value="20,14,20,4" />
+    </Style>
+
+    <!-- Project row -->
+    <Style Selector="Border.row">
+      <Setter Property="Padding" Value="14,10" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Margin" Value="10,1" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.row:pointerover">
+      <Setter Property="Background" Value="{DynamicResource CcAccentSoft}" />
+    </Style>
+
+    <!-- Pin dot -->
+    <Style Selector="Ellipse.pin">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="8" />
+      <Setter Property="Fill" Value="{DynamicResource CcPin}" />
+    </Style>
+    <Style Selector="Ellipse.pin.empty">
+      <Setter Property="Fill" Value="Transparent" />
+      <Setter Property="Stroke" Value="{DynamicResource CcBorder}" />
+      <Setter Property="StrokeThickness" Value="1" />
+    </Style>
+
+    <!-- Chevron -->
+    <Style Selector="Path.chevron">
+      <Setter Property="Fill" Value="{DynamicResource CcChevron}" />
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="8" />
+      <Setter Property="Stretch" Value="Uniform" />
+      <Setter Property="Data" Value="M 0,0 L 4,4 L 0,8 Z" />
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    </Style>
+
+    <!-- Project name -->
+    <Style Selector="TextBlock.name">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextPrimary}" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+
+    <!-- Sub text (session count / relative time) -->
+    <Style Selector="TextBlock.sub">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextSecondary}" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontFamily" Value="Consolas, 'SF Mono', Menlo, monospace" />
+    </Style>
+
+    <!-- "New" pill button -->
+    <Style Selector="Button.new">
+      <Setter Property="Background" Value="{DynamicResource CcAccentSoft}" />
+      <Setter Property="Foreground" Value="{DynamicResource CcAccent}" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="Padding" Value="10,4" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.new:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CcAccent}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="TextElement.Foreground" Value="White" />
+    </Style>
+
+    <!-- Expander restyling: kill the chrome, just use it as disclosure -->
+    <Style Selector="Expander /template/ Border#ExpanderHeader">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Expander /template/ Border#ExpanderContent">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Expander">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <!-- Hide the default expander toggle glyph; we draw our own chevron -->
+    <Style Selector="Expander /template/ ToggleButton#ExpanderHeader /template/ Path">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- Session row -->
+    <Style Selector="Border.session">
+      <Setter Property="Padding" Value="10,7" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Margin" Value="40,1,10,1" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.session:pointerover">
+      <Setter Property="Background" Value="{DynamicResource CcSurface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CcBorderFaint}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBlock.session-text">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextPrimary}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="TextBlock.session-time">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextSecondary}" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontFamily" Value="Consolas, 'SF Mono', Menlo, monospace" />
+    </Style>
+  </Window.Styles>
+
+  <ScrollViewer>
+    <StackPanel Margin="0,8,0,12">
+
+      <!-- Pinned section -->
+      <TextBlock Classes="section" Text="PINNED" IsVisible="{Binding HasPinned}" />
+      <ItemsControl ItemsSource="{Binding PinnedRows}" IsVisible="{Binding HasPinned}">
         <ItemsControl.ItemTemplate>
           <DataTemplate DataType="vm:ProjectRowViewModel">
-            <Expander Margin="0,0,0,4" Padding="8">
+            <Expander Background="Transparent" BorderThickness="0" Padding="0">
               <Expander.Header>
-                <Grid ColumnDefinitions="*,Auto">
-                  <Grid.ContextMenu>
+                <Border Classes="row"
+                        PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}">
+                  <Border.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="Pin / unpin" Tag="{Binding}" Click="TogglePin_Click" />
                       <MenuItem Header="Hide"        Tag="{Binding}" Click="Hide_Click" />
                       <MenuItem Header="Rename..."   Tag="{Binding}" Click="Rename_Click" />
                     </ContextMenu>
-                  </Grid.ContextMenu>
-                  <StackPanel Grid.Column="0" PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}" Cursor="Hand">
-                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding RelativeWhen}" Opacity="0.6" FontSize="11" />
-                  </StackPanel>
-                  <Button Grid.Column="1" Content="New" Tag="{Binding}" Click="NewSession_Click" />
-                </Grid>
+                  </Border.ContextMenu>
+                  <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
+                    <Path Grid.Column="0" Classes="chevron" Margin="0,0,10,0" VerticalAlignment="Center" />
+                    <Ellipse Grid.Column="1" Classes="pin" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                      <TextBlock Classes="name" Text="{Binding DisplayName}" />
+                      <TextBlock Classes="sub"  Text="{Binding RelativeWhen}" Margin="0,1,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="3" Classes="new" Content="New" Tag="{Binding}"
+                            Click="NewSession_Click" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
               </Expander.Header>
-              <ItemsControl ItemsSource="{Binding Sessions}" Margin="12,4,0,0">
+
+              <ItemsControl ItemsSource="{Binding Sessions}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="vm:SessionRowViewModel">
-                    <Border Padding="6" Margin="0,0,0,2" CornerRadius="4" Background="#0A000000"
-                            PointerPressed="SessionRow_PointerPressed" Tag="{Binding}" Cursor="Hand">
-                      <StackPanel>
-                        <TextBlock Text="{Binding DisplayText}" FontSize="12" />
-                        <TextBlock Text="{Binding RelativeWhen}" Opacity="0.6" FontSize="10" />
-                      </StackPanel>
+                    <Border Classes="session" PointerPressed="SessionRow_PointerPressed" Tag="{Binding}">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="session-text" Text="{Binding DisplayText}" />
+                        <TextBlock Grid.Column="1" Classes="session-time" Text="{Binding RelativeWhen}" Margin="8,0,0,0" />
+                      </Grid>
                     </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -46,6 +178,53 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-    </ScrollViewer>
-  </Grid>
+
+      <!-- Recent section -->
+      <TextBlock Classes="section" Text="RECENT" />
+      <ItemsControl ItemsSource="{Binding RecentRows}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:ProjectRowViewModel">
+            <Expander Background="Transparent" BorderThickness="0" Padding="0">
+              <Expander.Header>
+                <Border Classes="row"
+                        PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}">
+                  <Border.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="Pin / unpin" Tag="{Binding}" Click="TogglePin_Click" />
+                      <MenuItem Header="Hide"        Tag="{Binding}" Click="Hide_Click" />
+                      <MenuItem Header="Rename..."   Tag="{Binding}" Click="Rename_Click" />
+                    </ContextMenu>
+                  </Border.ContextMenu>
+                  <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
+                    <Path Grid.Column="0" Classes="chevron" Margin="0,0,10,0" VerticalAlignment="Center" />
+                    <Ellipse Grid.Column="1" Classes="pin empty" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                      <TextBlock Classes="name" Text="{Binding DisplayName}" />
+                      <TextBlock Classes="sub"  Text="{Binding RelativeWhen}" Margin="0,1,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="3" Classes="new" Content="New" Tag="{Binding}"
+                            Click="NewSession_Click" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </Expander.Header>
+
+              <ItemsControl ItemsSource="{Binding Sessions}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:SessionRowViewModel">
+                    <Border Classes="session" PointerPressed="SessionRow_PointerPressed" Tag="{Binding}">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="session-text" Text="{Binding DisplayText}" />
+                        <TextBlock Grid.Column="1" Classes="session-time" Text="{Binding RelativeWhen}" Margin="8,0,0,0" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Expander>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+    </StackPanel>
+  </ScrollViewer>
 </Window>
