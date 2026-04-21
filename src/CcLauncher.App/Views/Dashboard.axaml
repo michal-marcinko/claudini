@@ -13,17 +13,30 @@
       <ItemsControl ItemsSource="{Binding Rows}">
         <ItemsControl.ItemTemplate>
           <DataTemplate DataType="vm:ProjectRowViewModel">
-            <Border Padding="8" Margin="0,0,0,4" CornerRadius="6" BorderThickness="1" BorderBrush="#22000000"
-                    PointerPressed="ProjectRow_PointerPressed"
-                    Tag="{Binding}">
-              <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Grid.Column="0">
-                  <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding RelativeWhen}" Opacity="0.6" FontSize="11" />
-                </StackPanel>
-                <Button Grid.Column="1" Content="New" Tag="{Binding}" Click="NewSession_Click" />
-              </Grid>
-            </Border>
+            <Expander Margin="0,0,0,4" Padding="8">
+              <Expander.Header>
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Grid.Column="0" PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}" Cursor="Hand">
+                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding RelativeWhen}" Opacity="0.6" FontSize="11" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="New" Tag="{Binding}" Click="NewSession_Click" />
+                </Grid>
+              </Expander.Header>
+              <ItemsControl ItemsSource="{Binding Sessions}" Margin="12,4,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:SessionRowViewModel">
+                    <Border Padding="6" Margin="0,0,0,2" CornerRadius="4" Background="#0A000000"
+                            PointerPressed="SessionRow_PointerPressed" Tag="{Binding}" Cursor="Hand">
+                      <StackPanel>
+                        <TextBlock Text="{Binding DisplayText}" FontSize="12" />
+                        <TextBlock Text="{Binding RelativeWhen}" Opacity="0.6" FontSize="10" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Expander>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>

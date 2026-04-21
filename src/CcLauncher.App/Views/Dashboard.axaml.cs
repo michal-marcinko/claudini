@@ -1,3 +1,4 @@
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
@@ -32,6 +33,18 @@ public partial class Dashboard : Window
         if (sender is Button b && b.Tag is ProjectRowViewModel row)
         {
             _vm.LaunchNewSession(row);
+            if (AppServices.Config.GetGlobalSettings().CloseOnLaunch) Hide();
+            e.Handled = true;
+        }
+    }
+
+    private void SessionRow_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Control c && c.Tag is SessionRowViewModel srow)
+        {
+            var parent = _vm.Rows.FirstOrDefault(r => r.Sessions.Any(s => s.Id == srow.Id));
+            if (parent is null) return;
+            _vm.LaunchProject(parent, sessionId: srow.Id);
             if (AppServices.Config.GetGlobalSettings().CloseOnLaunch) Hide();
             e.Handled = true;
         }
