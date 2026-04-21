@@ -80,7 +80,6 @@
     </Style>
     <Style Selector="Button.new:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="{DynamicResource CcAccent}" />
-      <Setter Property="Foreground" Value="White" />
       <Setter Property="TextElement.Foreground" Value="White" />
     </Style>
 
