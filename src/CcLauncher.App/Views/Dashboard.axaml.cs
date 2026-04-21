@@ -10,13 +10,21 @@ namespace CcLauncher.App.Views;
 public partial class Dashboard : Window
 {
     private readonly DashboardViewModel _vm;
+    private ProjectsFileWatcher? _watcher;
 
     public Dashboard()
     {
         AvaloniaXamlLoader.Load(this);
         _vm = new DashboardViewModel(AppServices.Discovery, AppServices.Config, AppServices.Launcher);
         DataContext = _vm;
-        Opened += (_, _) => _vm.Refresh();
+        Opened += (_, _) =>
+        {
+            _vm.Refresh();
+            _watcher ??= new ProjectsFileWatcher(
+                CcLauncher.Core.Paths.PlatformPaths.ClaudeProjectsDir(),
+                () => Avalonia.Threading.Dispatcher.UIThread.Post(_vm.Refresh));
+        };
+        Closed += (_, _) => { _watcher?.Dispose(); _watcher = null; };
     }
 
     private void ProjectRow_PointerPressed(object? sender, PointerPressedEventArgs e)
