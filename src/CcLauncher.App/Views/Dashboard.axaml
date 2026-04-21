@@ -16,6 +16,13 @@
             <Expander Margin="0,0,0,4" Padding="8">
               <Expander.Header>
                 <Grid ColumnDefinitions="*,Auto">
+                  <Grid.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="Pin / unpin" Tag="{Binding}" Click="TogglePin_Click" />
+                      <MenuItem Header="Hide"        Tag="{Binding}" Click="Hide_Click" />
+                      <MenuItem Header="Rename..."   Tag="{Binding}" Click="Rename_Click" />
+                    </ContextMenu>
+                  </Grid.ContextMenu>
                   <StackPanel Grid.Column="0" PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}" Cursor="Hand">
                     <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding RelativeWhen}" Opacity="0.6" FontSize="11" />

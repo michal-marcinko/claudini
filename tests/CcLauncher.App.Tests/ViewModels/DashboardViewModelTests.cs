@@ -97,4 +97,59 @@ public class DashboardViewModelTests
 
         launcher.Captured!.ClaudeArgs.Should().NotContain("--resume");
     }
+
+    [Fact]
+    public void TogglePinned_PersistsAndResorts()
+    {
+        var disc = new FakeDiscovery
+        {
+            Projects = new[]
+            {
+                P("-old", "/old", new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc)),
+                P("-new", "/new", new DateTime(2026, 4, 20, 0, 0, 0, DateTimeKind.Utc)),
+            },
+        };
+        var cfg = new FakeConfig();
+        var vm = new DashboardViewModel(disc, cfg, new FakeLauncher());
+        vm.Refresh();
+
+        vm.TogglePinned(vm.Rows.First(r => r.Id == "-old"));
+
+        vm.Rows.Select(r => r.Id).Should().ContainInOrder("-old", "-new");
+        cfg.Settings["-old"].Pinned.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Hide_RemovesRow_AndPersists()
+    {
+        var disc = new FakeDiscovery
+        {
+            Projects = new[] { P("-a", "/a", DateTime.UtcNow) },
+        };
+        var cfg = new FakeConfig();
+        var vm = new DashboardViewModel(disc, cfg, new FakeLauncher());
+        vm.Refresh();
+
+        vm.Hide(vm.Rows[0]);
+
+        vm.Rows.Should().BeEmpty();
+        cfg.Settings["-a"].Hidden.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Rename_UpdatesDisplayName_AndPersists()
+    {
+        var disc = new FakeDiscovery
+        {
+            Projects = new[] { P("-a", "/foo/bar", DateTime.UtcNow) },
+        };
+        var cfg = new FakeConfig();
+        var vm = new DashboardViewModel(disc, cfg, new FakeLauncher());
+        vm.Refresh();
+
+        vm.Rename(vm.Rows[0], "My Thing");
+
+        vm.Rows[0].DisplayName.Should().Be("My Thing");
+        cfg.Settings["-a"].DisplayName.Should().Be("My Thing");
+    }
 }

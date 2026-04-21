@@ -76,4 +76,23 @@ public sealed partial class DashboardViewModel : ObservableObject
             LastError = $"Launch failed: {result.Error}";
         return result;
     }
+
+    public void TogglePinned(ProjectRowViewModel row)
+    {
+        var updated = row.Settings with { Pinned = !row.Settings.Pinned };
+        _config.SaveProjectSettings(updated);
+        Refresh();
+    }
+
+    public void Hide(ProjectRowViewModel row)
+    {
+        _config.SaveProjectSettings(row.Settings with { Hidden = true });
+        Refresh();
+    }
+
+    public void Rename(ProjectRowViewModel row, string newName)
+    {
+        _config.SaveProjectSettings(row.Settings with { DisplayName = string.IsNullOrWhiteSpace(newName) ? null : newName });
+        Refresh();
+    }
 }
