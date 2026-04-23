@@ -7,7 +7,10 @@ namespace CcLauncher.App.Services;
 
 public static class StartupIntegration
 {
-    private const string AppName = "cc-launcher";
+    private const string AppName = "Claudini";
+    // Kept so users who toggled Launch-on-startup under the old name can be cleaned
+    // up the next time they open settings. Remove after everyone has rotated.
+    private const string LegacyAppName = "cc-launcher";
 
     public static void Apply(bool enable)
     {
@@ -25,6 +28,9 @@ public static class StartupIntegration
         using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
             @"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
         if (key is null) return;
+        // Always strip the legacy entry so enabling under the new name doesn't leave
+        // two Run keys both pointing at (potentially different) Claudini exes.
+        key.DeleteValue(LegacyAppName, throwOnMissingValue: false);
         if (enable) key.SetValue(AppName, $"\"{exe}\"");
         else        key.DeleteValue(AppName, throwOnMissingValue: false);
     }
@@ -33,7 +39,7 @@ public static class StartupIntegration
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var plistDir = Path.Combine(home, "Library", "LaunchAgents");
-        var plistPath = Path.Combine(plistDir, "com.cclauncher.plist");
+        var plistPath = Path.Combine(plistDir, "com.claudini.plist");
         if (!enable)
         {
             if (File.Exists(plistPath)) File.Delete(plistPath);
@@ -45,7 +51,7 @@ public static class StartupIntegration
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0">
               <dict>
-                <key>Label</key><string>com.cclauncher</string>
+                <key>Label</key><string>com.claudini</string>
                 <key>ProgramArguments</key><array><string>{exe}</string></array>
                 <key>RunAtLoad</key><true/>
               </dict>
@@ -59,7 +65,7 @@ public static class StartupIntegration
         var cfg = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var autostartDir = Path.Combine(string.IsNullOrEmpty(cfg) ? Path.Combine(home, ".config") : cfg, "autostart");
-        var path = Path.Combine(autostartDir, "cc-launcher.desktop");
+        var path = Path.Combine(autostartDir, "claudini.desktop");
         if (!enable)
         {
             if (File.Exists(path)) File.Delete(path);
@@ -69,7 +75,7 @@ public static class StartupIntegration
         var content = $"""
             [Desktop Entry]
             Type=Application
-            Name=cc-launcher
+            Name=Claudini
             Exec="{exe}"
             Terminal=false
             X-GNOME-Autostart-enabled=true

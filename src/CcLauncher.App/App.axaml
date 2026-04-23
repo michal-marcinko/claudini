@@ -52,7 +52,8 @@
   <TrayIcon.Icons>
     <TrayIcons>
       <TrayIcon Icon="/Assets/tray.ico"
-                ToolTipText="cc-launcher">
+                ToolTipText="Claudini"
+                Clicked="OnTrayClicked">
         <TrayIcon.Menu>
           <NativeMenu>
             <NativeMenuItem Header="Open" Click="OnOpenDashboard" />
