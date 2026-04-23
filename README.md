@@ -80,6 +80,20 @@ Two details worth calling out for anyone reading the code:
 - No multi-user or remote Claude Code session handling.
 - The dashboard is tray-attached. It doesn't stand alone as a normal taskbar app.
 
+## Roadmap
+
+No dates, ordered roughly by impact.
+
+- **Cross-platform.** Finish the macOS and Linux paths. Tray icon pipeline, terminal selection, install/package scripts, and a real test pass on each OS.
+- **Peer-to-peer session sync.** Move a session from laptop to desktop without copying jsonls by hand. The hard part isn't the transport (Tailscale drop, mDNS + HTTP, or a small relay); it's path remapping between machines (the same project has a different cwd on each device) and conflict resolution when both sides edited the session.
+- **Global hotkey.** `Ctrl+Alt+Space` or similar to open the dashboard from anywhere without reaching for the tray.
+- **Search.** Filter projects and sessions by prompt text. Scrolling stops working once you have a few hundred sessions.
+- **Keyboard nav.** Arrow keys between rows, Enter to launch, `F` to favourite, `/` to focus search.
+- **Session preview.** Hover or expand to read the last few messages before launching, so you pick the right session the first time.
+- **Auto-update.** Poll the GitHub releases feed and surface an in-tray nudge when a new version ships.
+
+Open to suggestions at [issues](https://github.com/michal-marcinko/claudini/issues).
+
 ## Stack
 
 .NET 9, Avalonia 11 (FluentTheme, Mica on Win11), CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, xUnit, FluentAssertions.
