@@ -1,71 +1,51 @@
 <p align="center">
-  <img src="src/CcLauncher.App/Assets/claudini-light.png" width="120" alt="Claudini — top hat + spark logo" />
+  <img src="src/CcLauncher.App/Assets/claudini-light.png" width="120" alt="Claudini" />
 </p>
 
 <h1 align="center">Claudini</h1>
 
-<p align="center">
-  <em>A Windows tray launcher for Claude Code sessions.</em><br/>
-  Favourite your projects, one-click resume, no <code>cd</code>-ing, no typing <code>--resume &lt;uuid&gt;</code>.
-</p>
+<p align="center">System-tray app for resuming Claude Code sessions on Windows.</p>
 
 <p align="center">
-  <a href="https://github.com/michal-marcinko/claudini/releases/latest">
-    <img src="https://img.shields.io/github/v/release/michal-marcinko/claudini?label=latest&color=0a84ff" alt="Latest release" />
-  </a>
-  <img src="https://img.shields.io/badge/windows-x64-lightgrey" alt="Windows x64" />
-  <img src="https://img.shields.io/badge/.NET-9.0-512bd4" alt=".NET 9" />
+  <a href="https://github.com/michal-marcinko/claudini/releases/latest"><img src="https://img.shields.io/github/v/release/michal-marcinko/claudini?label=release" alt="latest release" /></a>
+  <img src="https://img.shields.io/badge/windows-x64-lightgrey" alt="windows x64" />
+  <img src="https://img.shields.io/badge/.NET-9.0-512bd4" alt="dotnet 9" />
 </p>
 
----
-
-## The problem
-
-Claude Code keeps a per-project history at `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`. Picking up where you left off looks like this:
-
-```powershell
-cd C:\Users\you\Desktop\some-project
-claude --resume 5fadcc1e-6787-4af7-8846-839637ec0d37
-```
-
-You have to remember the project, find the session UUID, open a terminal, `cd`, paste. Multiply that by the number of projects you're bouncing between and you stop resuming sessions altogether — you just start new ones.
-
-## The solution
-
-Claudini is a tiny system-tray app that does all of that for you. Left-click the tray icon → dashboard slides up showing every Claude Code project you've touched, grouped by favourites and recency. Click a project → a new terminal opens with the right `cd` and `claude --resume`. That's it.
-
-## Features
-
-- **Tray-first.** Left-click the tray icon to toggle the dashboard; right-click for Open / Resume last / Settings / Quit.
-- **Favourites + Recent.** Click the dot on any row to favourite — favourites pin to the top, the rest sort by recency.
-- **One-click resume.** Click a project row to resume its most recent session. Expand any row to see previous sessions and pick a specific one. Click **New** for a fresh session in that project.
-- **Prompt-based session labels.** Rows show the most recent prompt — the same label `claude --resume` displays — not a UUID or filename.
-- **Inline slide-out settings.** Terminal command, global `claude` args, system-prompt prefix, launch-on-startup, theme (Light / Dark / System) — all in a panel that slides in, no separate window.
-- **Extended title bar.** Windows chrome merges with the app top strip. Drag anywhere up top to move the window.
-- **Stays in the tray.** Closing the dashboard hides it; `Quit` from the tray menu actually exits.
-- **Poisoned-jsonl hardening.** A malicious session file can't smuggle shell-breaking strings into the launcher — any `cwd` containing control characters is rejected.
+Claude Code stores per-project transcripts under `~/.claude/projects/`. To resume one, you have to remember the project path, dig up the session UUID, and run `cd <project>; claude --resume <uuid>`. After a few projects it's easier to just start fresh. Claudini puts every project you've touched in a tray dropdown and resumes them in one click.
 
 ## Install
 
-Download the latest `Claudini.exe` from the [releases page](https://github.com/michal-marcinko/claudini/releases/latest).
+Grab `Claudini.exe` from the [latest release](https://github.com/michal-marcinko/claudini/releases/latest). Single-file self-contained build. No installer, no admin, no .NET runtime needed on the target machine. Drop it anywhere and run.
 
-- Self-contained single-file build, ~100 MB. No .NET install required on the target machine.
-- No installer, no admin. Drop it anywhere and run.
+The icon lives in the system tray once it's running. Windows 11 hides tray icons by default, so you'll find it behind the `^` overflow at the bottom-right of your taskbar. Drag it out of the overflow if you want it one-click away.
 
-On first launch the Claudini icon appears in your system tray. If you don't see it, expand the `^` hidden-icons flyout in the bottom-right of your taskbar.
+## Using it
+
+Left-click the tray icon. The dashboard drops down with two sections, Favourites and Recent. Click a project to resume its most recent session. Expand a row to see older sessions and pick one. Click the dot beside a project to toggle favourite.
+
+The **New** button starts a fresh session in that project's cwd instead of resuming.
+
+Right-click the tray icon for Open / Resume last / Settings / Quit.
+
+## Settings
+
+Gear button in the top-left of the dashboard, or the tray menu. From there:
+
+- Terminal command (default `wt`)
+- Global extra args appended to every `claude` invocation
+- A system-prompt prefix injected via `--append-system-prompt`
+- Launch on Windows startup
+- Close dashboard after a launch
+- Theme: Light / Dark / System
+
+Saves are written to SQLite at `%APPDATA%\cc-launcher\app.db` and applied immediately.
 
 ## Requirements
 
 - Windows 10 or 11, x64
-- [`claude`](https://docs.anthropic.com/claude-code) CLI installed and on your `PATH`
-- [Windows Terminal](https://apps.microsoft.com/detail/9n0dx20hk701) recommended (anything PowerShell-capable works; configure in Settings)
-
-## How it works
-
-1. On launch, Claudini scans `~/.claude/projects/*/*.jsonl` and infers each project's real working directory from the jsonl contents. Modern Claude Code jsonl files open with metadata records that don't carry `cwd`, so Claudini scans forward until it finds a record that does, validates the string for safety, and falls back to the encoded folder name if nothing clean is found.
-2. Projects are grouped by favourite status and sorted by last activity. The file watcher on `~/.claude/projects/` refreshes the dashboard as sessions are created or updated.
-3. Clicking a row spawns your configured terminal (Windows Terminal by default) with `cd <project-cwd>; claude --resume <session-id>`.
-4. Favourites, hidden projects, display-name overrides, and launch history live in a local SQLite database at `%APPDATA%\cc-launcher\app.db`.
+- [`claude`](https://docs.anthropic.com/claude-code) on your `PATH`
+- A PowerShell-capable terminal. [Windows Terminal](https://apps.microsoft.com/detail/9n0dx20hk701) is the default.
 
 ## Build from source
 
@@ -73,26 +53,33 @@ On first launch the Claudini icon appears in your system tray. If you don't see 
 git clone https://github.com/michal-marcinko/claudini.git
 cd claudini
 dotnet build
-dotnet test            # 57 tests across Core + App
+dotnet test            # 57 tests
 .\publish.ps1          # produces publish\win-x64\Claudini.exe
 ```
 
-Requires the .NET 9 SDK.
+Needs the .NET 9 SDK.
 
-## Tech
+## How it works
 
-- [Avalonia 11](https://avaloniaui.net) with FluentTheme — cross-platform XAML, Mica on Windows 11
-- [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) for observable view-models
-- `Microsoft.Data.Sqlite` for local settings + launch history
-- xUnit + FluentAssertions for tests
-- P/Invoke to `user32.dll` for a taskbar-icon fix ([Avalonia #11569](https://github.com/AvaloniaUI/Avalonia/issues/11569)) — Avalonia on Win32 only sets `ICON_BIG`, so the taskbar thumbnail falls back to a default; Claudini sends a second `WM_SETICON` for `ICON_SMALL`.
+Claudini watches `~/.claude/projects/` and reads each session jsonl to pull out:
 
-## Known limitations
+- the real working directory. Modern Claude Code jsonl files lead with metadata records that don't carry `cwd`, so discovery scans forward until it finds a record that does. The result is validated for control characters (CR/LF/NUL) before it flows to the launcher, so a malformed or hostile session file can't inject into the shell.
+- the most recent prompt, shown as the session label. This matches the label `claude --resume` uses so the same entry you'd pick in the CLI picker is the same entry you'll pick here.
+- the slug and timestamps.
 
-- **Windows-first.** The macOS and Linux launcher paths exist in the codebase but aren't exercised in 0.1.0.
-- **System tray only.** The dashboard is a tray-attached window by design, not a taskbar app.
-- **Local, single-user.** No remote or multi-user Claude Code session handling.
+Launching spawns your terminal with the equivalent of `cd <cwd>; claude --resume <session-id>`. Favourites, hidden projects, display-name overrides, and launch history live in the SQLite file above.
 
-## Why "Claudini"?
+Two details worth calling out for anyone reading the code:
 
-Because it makes Claude Code sessions reappear from thin air. Top hat. Spark. You get it.
+1. Avalonia 11 on Windows doesn't set `ICON_SMALL` via `WM_SETICON` ([upstream issue](https://github.com/AvaloniaUI/Avalonia/issues/11569)), so the taskbar thumbnail falls back to a default. Claudini P/Invokes a second `WM_SETICON` to populate that slot.
+2. Pinning a favourite used to call `Refresh()` which re-scanned the filesystem and rebuilt every row, producing a visible stutter on every click. The dashboard now does a surgical move between the Favourites/Recent collections with the same row instance, so the ToggleButton you clicked stays alive and just slides.
+
+## Not in 0.1
+
+- The macOS and Linux launcher paths exist in code but aren't exercised yet.
+- No multi-user or remote Claude Code session handling.
+- The dashboard is tray-attached. It doesn't stand alone as a normal taskbar app.
+
+## Stack
+
+.NET 9, Avalonia 11 (FluentTheme, Mica on Win11), CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, xUnit, FluentAssertions.
