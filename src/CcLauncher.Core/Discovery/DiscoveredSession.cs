@@ -7,4 +7,6 @@ public sealed record DiscoveredSession(
     DateTime StartedAt,
     DateTime LastActivity,
     int MessageCount,
-    string? FirstUserMsg);
+    string? FirstUserMsg,
+    string? LastPrompt = null,
+    string? Slug = null);

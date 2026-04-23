@@ -85,4 +85,49 @@ public class ProjectDiscoveryServiceTests : IDisposable
         projects.Should().ContainSingle();
         projects[0].Sessions.Should().BeEmpty();
     }
+
+    [Fact]
+    public void Scan_PoisonedCwdWithNewline_IsRejected()
+    {
+        // Security: a jsonl dropped by another user (or corrupt session file)
+        // could carry a cwd string with embedded CR/LF, which would break out
+        // of shell-quoting in the PowerShell launcher. Discovery must reject
+        // any cwd containing control characters and fall through to the next
+        // candidate (or the encoded-id fallback).
+        var dir = Path.Combine(_root, "-poison");
+        Directory.CreateDirectory(dir);
+        File.WriteAllLines(Path.Combine(dir, "s.jsonl"), new[]
+        {
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","cwd":"C:\\bad\r\nStart-Process calc\r\n#","message":{"role":"user","content":"x"}}""",
+        });
+
+        var projects = new ProjectDiscoveryService(_root).Scan();
+
+        projects.Should().ContainSingle();
+        projects[0].Cwd.Should().NotContain("\r");
+        projects[0].Cwd.Should().NotContain("\n");
+    }
+
+    [Fact]
+    public void Scan_JsonlWithLeadingMetadataLines_StillRecoversCwd()
+    {
+        // Regression: modern Claude Code prepends metadata records (permission-mode,
+        // hook output, SessionStart reminders) that lack a `cwd` field. Discovery must
+        // scan forward until it finds a record that carries the working directory,
+        // otherwise it falls back to the encoded folder name and the launcher tries
+        // to cd into a non-existent relative path.
+        var dir = Path.Combine(_root, "-home-x-foo");
+        Directory.CreateDirectory(dir);
+        File.WriteAllLines(Path.Combine(dir, "s1.jsonl"), new[]
+        {
+            """{"type":"permission-mode","permissionMode":"bypassPermissions","sessionId":"s1"}""",
+            """{"type":"attachment","attachment":{"type":"hook_success","hookName":"SessionStart:startup"}}""",
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","cwd":"/home/x/foo","message":{"role":"user","content":"hi"}}""",
+        });
+
+        var projects = new ProjectDiscoveryService(_root).Scan();
+
+        projects.Should().ContainSingle();
+        projects[0].Cwd.Should().Be("/home/x/foo");
+    }
 }

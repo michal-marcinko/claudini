@@ -12,7 +12,16 @@ public sealed class SessionRowViewModel
     public DateTime StartedAt   => Session.StartedAt;
     public DateTime LastActivity => Session.LastActivity;
     public int MessageCount     => Session.MessageCount;
-    public string DisplayText   => Session.FirstUserMsg ?? "(no preview)";
+    // Match Claude Code's resume picker: it labels sessions with the most recent
+    // prompt, not the first. Slug is a three-word codename — useful as a last
+    // resort before "(no preview)" when the session has no prompt content yet.
+    public string DisplayText =>
+        NonBlank(Session.LastPrompt) ??
+        NonBlank(Session.FirstUserMsg) ??
+        NonBlank(Session.Slug) ??
+        "(no preview)";
+
+    private static string? NonBlank(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
     public string RelativeWhen  => RelativeTime.Format(Session.LastActivity);
 }
 

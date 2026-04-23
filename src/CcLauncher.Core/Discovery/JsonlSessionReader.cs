@@ -14,6 +14,8 @@ public sealed class JsonlSessionReader
 
         string? firstLine = null;
         string? lastLine = null;
+        string? slug = null;
+        string? lastPrompt = null;
         var count = 0;
 
         foreach (var line in File.ReadLines(filePath))
@@ -22,6 +24,9 @@ public sealed class JsonlSessionReader
             firstLine ??= line;
             lastLine = line;
             count++;
+
+            // Side-channel parses — best-effort, never fatal to the main scan.
+            TryExtractSideChannels(line, ref slug, ref lastPrompt);
         }
 
         var (startedAt, firstUserMsg) = ParseFirst(firstLine, fi);
@@ -33,7 +38,40 @@ public sealed class JsonlSessionReader
             StartedAt: startedAt,
             LastActivity: lastActivity,
             MessageCount: count,
-            FirstUserMsg: firstUserMsg);
+            FirstUserMsg: firstUserMsg,
+            LastPrompt: lastPrompt,
+            Slug: slug);
+    }
+
+    // Claude Code attaches a `slug` (three-word codename) to many records, and emits
+    // `{"type":"last-prompt","lastPrompt":"..."}` whenever the user submits a prompt
+    // — the resume picker displays the most recent one. We capture both on a single pass.
+    private static void TryExtractSideChannels(string line, ref string? slug, ref string? lastPrompt)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(line);
+            var root = doc.RootElement;
+
+            if (slug is null &&
+                root.TryGetProperty("slug", out var slugEl) &&
+                slugEl.ValueKind == JsonValueKind.String)
+            {
+                slug = slugEl.GetString();
+            }
+
+            if (root.TryGetProperty("type", out var typeEl) &&
+                typeEl.ValueKind == JsonValueKind.String &&
+                typeEl.GetString() == "last-prompt" &&
+                root.TryGetProperty("lastPrompt", out var lpEl) &&
+                lpEl.ValueKind == JsonValueKind.String)
+            {
+                var lp = lpEl.GetString();
+                if (!string.IsNullOrEmpty(lp))
+                    lastPrompt = lp!.Length > PreviewMaxChars ? lp[..PreviewMaxChars] : lp;
+            }
+        }
+        catch (JsonException) { /* not our concern on side-channel scan */ }
     }
 
     private static (DateTime startedAt, string? firstUserMsg) ParseFirst(string? line, FileInfo fi)

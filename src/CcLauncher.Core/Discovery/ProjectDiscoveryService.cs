@@ -55,15 +55,49 @@ public sealed class ProjectDiscoveryService : IProjectDiscoveryService
     // We can't perfectly recover the original path, so this is a display fallback.
     private static string DecodeId(string id) => id;
 
+    // Modern Claude Code jsonl files open with metadata records (permission-mode,
+    // attachment/hook output, SessionStart reminders) that don't carry a cwd field.
+    // Scan forward until we find a record that does, but cap the scan so we don't
+    // read megabytes for a malformed file.
+    private const int CwdScanLineLimit = 200;
+
     private static string? InferCwd(string firstJsonlPath)
     {
         try
         {
-            var line = File.ReadLines(firstJsonlPath).FirstOrDefault(l => !string.IsNullOrWhiteSpace(l));
-            if (line is null) return null;
-            using var doc = JsonDocument.Parse(line);
-            return doc.RootElement.TryGetProperty("cwd", out var c) ? c.GetString() : null;
+            var scanned = 0;
+            foreach (var line in File.ReadLines(firstJsonlPath))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (++scanned > CwdScanLineLimit) break;
+
+                string? cwd;
+                try
+                {
+                    using var doc = JsonDocument.Parse(line);
+                    cwd = doc.RootElement.TryGetProperty("cwd", out var c) && c.ValueKind == JsonValueKind.String
+                        ? c.GetString()
+                        : null;
+                }
+                catch (JsonException) { continue; }
+
+                if (IsSafeCwd(cwd)) return cwd;
+            }
+            return null;
         }
-        catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException) { return null; }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return null; }
+    }
+
+    // Reject cwd strings that could break out of shell quoting or smuggle path
+    // sequences into downstream launchers. The jsonl can be attacker-influenced
+    // (anyone who can drop a file in ~/.claude/projects/* can poison it), so any
+    // cwd we return flows directly into a child process's WorkingDirectory and
+    // the PowerShell fallback's Set-Location -LiteralPath argument.
+    private static bool IsSafeCwd(string? cwd)
+    {
+        if (string.IsNullOrWhiteSpace(cwd)) return false;
+        foreach (var ch in cwd)
+            if (ch == '\r' || ch == '\n' || ch == '\0') return false;
+        return true;
     }
 }

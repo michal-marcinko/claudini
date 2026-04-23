@@ -100,4 +100,78 @@ public class JsonlSessionReaderTests : IDisposable
 
         s.FirstUserMsg.Should().HaveLength(60);
     }
+
+    [Fact]
+    public void Read_CapturesSlug_FromAnyRecord()
+    {
+        var path = WriteJsonl("slug", new[]
+        {
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","message":{"role":"user","content":"hi"},"slug":"velvet-kindling-key"}""",
+            """{"type":"assistant","timestamp":"2026-04-21T10:00:05Z","message":{"role":"assistant","content":"hello"}}""",
+        });
+
+        var s = new JsonlSessionReader().Read(path);
+
+        s.Slug.Should().Be("velvet-kindling-key");
+    }
+
+    [Fact]
+    public void Read_CapturesLastPrompt_FromTerminalRecord()
+    {
+        var path = WriteJsonl("lp", new[]
+        {
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","message":{"role":"user","content":"first"}}""",
+            """{"type":"user","timestamp":"2026-04-21T10:05:00Z","message":{"role":"user","content":"second"}}""",
+            """{"type":"last-prompt","lastPrompt":"why are we getting temporary api errors again?"}""",
+        });
+
+        var s = new JsonlSessionReader().Read(path);
+
+        s.LastPrompt.Should().Be("why are we getting temporary api errors again?");
+    }
+
+    [Fact]
+    public void Read_LastPrompt_TakesMostRecentWhenMultiple()
+    {
+        var path = WriteJsonl("lp-multi", new[]
+        {
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","message":{"role":"user","content":"hi"}}""",
+            """{"type":"last-prompt","lastPrompt":"old prompt"}""",
+            """{"type":"user","timestamp":"2026-04-21T10:05:00Z","message":{"role":"user","content":"more"}}""",
+            """{"type":"last-prompt","lastPrompt":"newest prompt"}""",
+        });
+
+        var s = new JsonlSessionReader().Read(path);
+
+        s.LastPrompt.Should().Be("newest prompt");
+    }
+
+    [Fact]
+    public void Read_LastPrompt_TruncatesLikeFirstUserMsg()
+    {
+        var longPrompt = new string('y', 200);
+        var path = WriteJsonl("lp-long", new[]
+        {
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","message":{"role":"user","content":"hi"}}""",
+            $$$"""{"type":"last-prompt","lastPrompt":"{{{longPrompt}}}"}""",
+        });
+
+        var s = new JsonlSessionReader().Read(path);
+
+        s.LastPrompt.Should().HaveLength(60);
+    }
+
+    [Fact]
+    public void Read_NoSlugOrLastPrompt_ReturnsNull()
+    {
+        var path = WriteJsonl("plain", new[]
+        {
+            """{"type":"user","timestamp":"2026-04-21T10:00:00Z","message":{"role":"user","content":"hi"}}""",
+        });
+
+        var s = new JsonlSessionReader().Read(path);
+
+        s.Slug.Should().BeNull();
+        s.LastPrompt.Should().BeNull();
+    }
 }
