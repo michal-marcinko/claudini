@@ -173,6 +173,42 @@ public class DashboardViewModelTests
     }
 
     [Fact]
+    public void Refresh_PreservesIsExpanded_AcrossRebuilds()
+    {
+        // Regression: the file watcher debounces many rapid jsonl writes into frequent
+        // Refresh() calls. If row-expansion state lives only in the XAML visual tree,
+        // every refresh collapses whichever row the user had open. VM must remember
+        // per-project expansion and re-apply it when rebuilding rows.
+        var disc = new FakeDiscovery
+        {
+            Projects = new[] { P("-a", "/a", DateTime.UtcNow), P("-b", "/b", DateTime.UtcNow.AddMinutes(-5)) },
+        };
+        var vm = new DashboardViewModel(disc, new FakeConfig(), new FakeLauncher());
+        vm.Refresh();
+        var rowA = vm.Rows.First(r => r.Id == "-a");
+        rowA.IsExpanded = true;
+
+        vm.Refresh(); // simulates watcher tick after jsonl write
+
+        vm.Rows.First(r => r.Id == "-a").IsExpanded.Should().BeTrue();
+        vm.Rows.First(r => r.Id == "-b").IsExpanded.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Refresh_CollapsedRow_DoesNotReappearExpanded()
+    {
+        var disc = new FakeDiscovery { Projects = new[] { P("-a", "/a", DateTime.UtcNow) } };
+        var vm = new DashboardViewModel(disc, new FakeConfig(), new FakeLauncher());
+        vm.Refresh();
+        vm.Rows[0].IsExpanded = true;
+        vm.Rows[0].IsExpanded = false;
+
+        vm.Refresh();
+
+        vm.Rows[0].IsExpanded.Should().BeFalse();
+    }
+
+    [Fact]
     public void Rename_UpdatesDisplayName_AndPersists()
     {
         var disc = new FakeDiscovery

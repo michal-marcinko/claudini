@@ -3,15 +3,20 @@
         xmlns:vm="clr-namespace:CcLauncher.App.ViewModels"
         x:Class="CcLauncher.App.Views.Dashboard"
         x:DataType="vm:DashboardViewModel"
-        Width="440" Height="640"
+        Width="460" Height="640"
         ShowInTaskbar="False"
         WindowStartupLocation="Manual"
         TransparencyLevelHint="Mica,AcrylicBlur,None"
         Background="{DynamicResource CcWindowBackground}"
-        Title="cc-launcher">
+        FontFamily="Segoe UI Variable Text, Segoe UI, -apple-system, Arial"
+        Icon="/Assets/claudini.ico"
+        Title="Claudini"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        ExtendClientAreaTitleBarHeightHint="40">
 
   <Window.Styles>
-    <!-- Section header ("Pinned", "Recent") -->
+    <!-- Section header -->
     <Style Selector="TextBlock.section">
       <Setter Property="Foreground" Value="{DynamicResource CcTextTertiary}" />
       <Setter Property="FontSize" Value="10" />
@@ -19,28 +24,35 @@
       <Setter Property="Margin" Value="20,14,20,4" />
     </Style>
 
-    <!-- Project row -->
-    <Style Selector="Border.row">
-      <Setter Property="Padding" Value="14,10" />
-      <Setter Property="CornerRadius" Value="8" />
-      <Setter Property="Margin" Value="10,1" />
-      <Setter Property="Cursor" Value="Hand" />
+    <!-- Project row (ToggleButton with custom template) -->
+    <Style Selector="ToggleButton.row">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="14,10" />
+      <Setter Property="Margin" Value="10,1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border x:Name="PART_Bg"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="Stretch"
+                              VerticalContentAlignment="Center" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
     </Style>
-    <Style Selector="Border.row:pointerover">
+    <Style Selector="ToggleButton.row:pointerover /template/ Border#PART_Bg">
       <Setter Property="Background" Value="{DynamicResource CcAccentSoft}" />
     </Style>
-
-    <!-- Pin dot -->
-    <Style Selector="Ellipse.pin">
-      <Setter Property="Width" Value="8" />
-      <Setter Property="Height" Value="8" />
-      <Setter Property="Fill" Value="{DynamicResource CcPin}" />
-    </Style>
-    <Style Selector="Ellipse.pin.empty">
-      <Setter Property="Fill" Value="Transparent" />
-      <Setter Property="Stroke" Value="{DynamicResource CcBorder}" />
-      <Setter Property="StrokeThickness" Value="1" />
+    <Style Selector="ToggleButton.row:checked /template/ Border#PART_Bg">
+      <Setter Property="Background" Value="{DynamicResource CcSurfaceMuted}" />
     </Style>
 
     <!-- Chevron -->
@@ -51,23 +63,64 @@
       <Setter Property="Stretch" Value="Uniform" />
       <Setter Property="Data" Value="M 0,0 L 4,4 L 0,8 Z" />
       <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" />
+        </Transitions>
+      </Setter>
+      <Setter Property="RenderTransform" Value="rotate(0deg)" />
+    </Style>
+    <Style Selector="ToggleButton.row:checked Path.chevron">
+      <Setter Property="Fill" Value="{DynamicResource CcTextSecondary}" />
+      <Setter Property="RenderTransform" Value="rotate(90deg)" />
     </Style>
 
-    <!-- Project name -->
+    <!-- Favourite dot (button wraps the dot so the whole 20px hit area is clickable) -->
+    <Style Selector="Ellipse.pin">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="8" />
+      <Setter Property="Fill" Value="{DynamicResource CcPin}" />
+    </Style>
+    <Style Selector="Ellipse.pin.empty">
+      <Setter Property="Fill" Value="Transparent" />
+      <Setter Property="Stroke" Value="{DynamicResource CcBorder}" />
+      <Setter Property="StrokeThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.fav">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="4" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.fav /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="10" />
+    </Style>
+    <Style Selector="Button.fav:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CcPinHalo}" />
+    </Style>
+    <!-- Hovering an empty dot previews the "favourited" fill so intent is obvious -->
+    <Style Selector="Button.fav:pointerover Ellipse.pin.empty">
+      <Setter Property="Fill" Value="{DynamicResource CcPinHalo}" />
+      <Setter Property="Stroke" Value="{DynamicResource CcPin}" />
+    </Style>
+
+    <!-- Project name / sub / "New" pill -->
     <Style Selector="TextBlock.name">
       <Setter Property="Foreground" Value="{DynamicResource CcTextPrimary}" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
-
-    <!-- Sub text (session count / relative time) -->
     <Style Selector="TextBlock.sub">
       <Setter Property="Foreground" Value="{DynamicResource CcTextSecondary}" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="FontFamily" Value="Consolas, 'SF Mono', Menlo, monospace" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
 
-    <!-- "New" pill button -->
     <Style Selector="Button.new">
       <Setter Property="Background" Value="{DynamicResource CcAccentSoft}" />
       <Setter Property="Foreground" Value="{DynamicResource CcAccent}" />
@@ -78,30 +131,13 @@
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="Cursor" Value="Hand" />
     </Style>
+    <Style Selector="Button.new /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CcAccentSoft}" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
     <Style Selector="Button.new:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="{DynamicResource CcAccent}" />
       <Setter Property="TextElement.Foreground" Value="White" />
-    </Style>
-
-    <!-- Expander restyling: kill the chrome, just use it as disclosure -->
-    <Style Selector="Expander /template/ Border#ExpanderHeader">
-      <Setter Property="Padding" Value="0" />
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-    </Style>
-    <Style Selector="Expander /template/ Border#ExpanderContent">
-      <Setter Property="Padding" Value="0" />
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-    </Style>
-    <Style Selector="Expander">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Padding" Value="0" />
-    </Style>
-    <!-- Hide the default expander toggle glyph; we draw our own chevron -->
-    <Style Selector="Expander /template/ ToggleButton#ExpanderHeader /template/ Path">
-      <Setter Property="IsVisible" Value="False" />
     </Style>
 
     <!-- Session row -->
@@ -111,11 +147,12 @@
       <Setter Property="Margin" Value="40,1,10,1" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
     <Style Selector="Border.session:pointerover">
       <Setter Property="Background" Value="{DynamicResource CcSurface}" />
       <Setter Property="BorderBrush" Value="{DynamicResource CcBorderFaint}" />
-      <Setter Property="BorderThickness" Value="1" />
     </Style>
     <Style Selector="TextBlock.session-text">
       <Setter Property="Foreground" Value="{DynamicResource CcTextPrimary}" />
@@ -127,41 +164,111 @@
       <Setter Property="FontSize" Value="11" />
       <Setter Property="FontFamily" Value="Consolas, 'SF Mono', Menlo, monospace" />
     </Style>
+
+    <!-- Gear / back button — shared chrome for the settings open/close affordance -->
+    <Style Selector="Button.chrome">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="Foreground" Value="{DynamicResource CcTextSecondary}" />
+    </Style>
+    <Style Selector="Button.chrome /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.chrome:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CcSurfaceMuted}" />
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource CcTextPrimary}" />
+    </Style>
+
+    <!-- Slide-out settings panel: parked off to the left until .open is applied -->
+    <Style Selector="Border.settings-panel">
+      <Setter Property="Background" Value="{DynamicResource CcWindowBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CcBorderFaint}" />
+      <Setter Property="BorderThickness" Value="0,0,1,0" />
+      <Setter Property="RenderTransform" Value="translateX(-460px)" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform"
+                                         Duration="0:0:0.22"
+                                         Easing="CubicEaseOut" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.settings-panel.open">
+      <Setter Property="RenderTransform" Value="translateX(0)" />
+    </Style>
+
+    <Style Selector="TextBlock.settings-title">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextPrimary}" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.settings-label">
+      <Setter Property="Foreground" Value="{DynamicResource CcTextPrimary}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,8,0,4" />
+    </Style>
+    <Style Selector="Button.settings-primary">
+      <Setter Property="Background" Value="{DynamicResource CcAccent}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.settings-primary /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CcAccent}" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
   </Window.Styles>
 
+  <Grid>
   <ScrollViewer>
-    <StackPanel Margin="0,8,0,12">
+    <!-- Top margin leaves a 44px strip for the floating gear so it doesn't
+         overlap the first section header. -->
+    <StackPanel Margin="0,44,0,12">
 
-      <!-- Pinned section -->
-      <TextBlock Classes="section" Text="PINNED" IsVisible="{Binding HasPinned}" />
+      <!-- FAVOURITES -->
+      <TextBlock Classes="section" Text="FAVOURITES" IsVisible="{Binding HasPinned}" />
       <ItemsControl ItemsSource="{Binding PinnedRows}" IsVisible="{Binding HasPinned}">
         <ItemsControl.ItemTemplate>
           <DataTemplate DataType="vm:ProjectRowViewModel">
-            <Expander Background="Transparent" BorderThickness="0" Padding="0">
-              <Expander.Header>
-                <Border Classes="row"
-                        PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}">
-                  <Border.ContextMenu>
+            <StackPanel>
+              <ToggleButton x:Name="toggle" Classes="row" IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
+                  <Grid.ContextMenu>
                     <ContextMenu>
-                      <MenuItem Header="Pin / unpin" Tag="{Binding}" Click="TogglePin_Click" />
+                      <MenuItem Header="Favourite / unfavourite" Tag="{Binding}" Click="TogglePin_Click" />
                       <MenuItem Header="Hide"        Tag="{Binding}" Click="Hide_Click" />
                       <MenuItem Header="Rename..."   Tag="{Binding}" Click="Rename_Click" />
                     </ContextMenu>
-                  </Border.ContextMenu>
-                  <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
-                    <Path Grid.Column="0" Classes="chevron" Margin="0,0,10,0" VerticalAlignment="Center" />
-                    <Ellipse Grid.Column="1" Classes="pin" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                      <TextBlock Classes="name" Text="{Binding DisplayName}" />
-                      <TextBlock Classes="sub"  Text="{Binding RelativeWhen}" Margin="0,1,0,0" />
-                    </StackPanel>
-                    <Button Grid.Column="3" Classes="new" Content="New" Tag="{Binding}"
-                            Click="NewSession_Click" VerticalAlignment="Center" />
-                  </Grid>
-                </Border>
-              </Expander.Header>
-
-              <ItemsControl ItemsSource="{Binding Sessions}">
+                  </Grid.ContextMenu>
+                  <Path Grid.Column="0" Classes="chevron" Margin="0,0,10,0" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="fav" Tag="{Binding}" Click="Favourite_Click"
+                          ToolTip.Tip="Unfavourite" Margin="0,0,8,0">
+                    <Ellipse Classes="pin" />
+                  </Button>
+                  <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                    <TextBlock Classes="name" Text="{Binding DisplayName}" />
+                    <TextBlock Classes="sub"  Text="{Binding RelativeWhen}" Margin="0,1,0,0" />
+                  </StackPanel>
+                  <Button Grid.Column="3" Classes="new" Content="New" Tag="{Binding}"
+                          Click="NewSession_Click" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </Grid>
+              </ToggleButton>
+              <ItemsControl ItemsSource="{Binding Sessions}"
+                            IsVisible="{Binding #toggle.IsChecked}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="vm:SessionRowViewModel">
                     <Border Classes="session" PointerPressed="SessionRow_PointerPressed" Tag="{Binding}">
@@ -173,41 +280,41 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-            </Expander>
+            </StackPanel>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
 
-      <!-- Recent section -->
+      <!-- RECENT -->
       <TextBlock Classes="section" Text="RECENT" />
       <ItemsControl ItemsSource="{Binding RecentRows}">
         <ItemsControl.ItemTemplate>
           <DataTemplate DataType="vm:ProjectRowViewModel">
-            <Expander Background="Transparent" BorderThickness="0" Padding="0">
-              <Expander.Header>
-                <Border Classes="row"
-                        PointerPressed="ProjectRow_PointerPressed" Tag="{Binding}">
-                  <Border.ContextMenu>
+            <StackPanel>
+              <ToggleButton x:Name="toggle" Classes="row" IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
+                  <Grid.ContextMenu>
                     <ContextMenu>
-                      <MenuItem Header="Pin / unpin" Tag="{Binding}" Click="TogglePin_Click" />
+                      <MenuItem Header="Favourite / unfavourite" Tag="{Binding}" Click="TogglePin_Click" />
                       <MenuItem Header="Hide"        Tag="{Binding}" Click="Hide_Click" />
                       <MenuItem Header="Rename..."   Tag="{Binding}" Click="Rename_Click" />
                     </ContextMenu>
-                  </Border.ContextMenu>
-                  <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
-                    <Path Grid.Column="0" Classes="chevron" Margin="0,0,10,0" VerticalAlignment="Center" />
-                    <Ellipse Grid.Column="1" Classes="pin empty" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                      <TextBlock Classes="name" Text="{Binding DisplayName}" />
-                      <TextBlock Classes="sub"  Text="{Binding RelativeWhen}" Margin="0,1,0,0" />
-                    </StackPanel>
-                    <Button Grid.Column="3" Classes="new" Content="New" Tag="{Binding}"
-                            Click="NewSession_Click" VerticalAlignment="Center" />
-                  </Grid>
-                </Border>
-              </Expander.Header>
-
-              <ItemsControl ItemsSource="{Binding Sessions}">
+                  </Grid.ContextMenu>
+                  <Path Grid.Column="0" Classes="chevron" Margin="0,0,10,0" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="fav" Tag="{Binding}" Click="Favourite_Click"
+                          ToolTip.Tip="Favourite" Margin="0,0,8,0">
+                    <Ellipse Classes="pin empty" />
+                  </Button>
+                  <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                    <TextBlock Classes="name" Text="{Binding DisplayName}" />
+                    <TextBlock Classes="sub"  Text="{Binding RelativeWhen}" Margin="0,1,0,0" />
+                  </StackPanel>
+                  <Button Grid.Column="3" Classes="new" Content="New" Tag="{Binding}"
+                          Click="NewSession_Click" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </Grid>
+              </ToggleButton>
+              <ItemsControl ItemsSource="{Binding Sessions}"
+                            IsVisible="{Binding #toggle.IsChecked}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="vm:SessionRowViewModel">
                     <Border Classes="session" PointerPressed="SessionRow_PointerPressed" Tag="{Binding}">
@@ -219,11 +326,75 @@
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-            </Expander>
+            </StackPanel>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
 
     </StackPanel>
   </ScrollViewer>
+
+    <!-- Floating gear button — opens the settings slide-out -->
+    <Button x:Name="SettingsGear" Classes="chrome"
+            HorizontalAlignment="Left" VerticalAlignment="Top"
+            Margin="8,6,0,0"
+            ToolTip.Tip="Settings"
+            Click="OpenSettings_Click">
+      <TextBlock Text="⚙" FontSize="16" />
+    </Button>
+
+    <!-- Slide-out settings panel — fills the window, translated off-screen by default.
+         Its DataContext is a SettingsViewModel set in code-behind; x:DataType
+         scopes the compiled bindings inside this subtree to that VM. -->
+    <Border x:Name="SettingsPanel" Classes="settings-panel" x:DataType="vm:SettingsViewModel">
+      <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header: back button + title -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="10,8,10,6">
+          <Button Grid.Column="0" Classes="chrome" Click="CloseSettings_Click" ToolTip.Tip="Back">
+            <TextBlock Text="←" FontSize="16" />
+          </Button>
+          <TextBlock Grid.Column="1" Classes="settings-title" Text="Settings"
+                     Margin="8,0,0,0" VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Scrollable fields -->
+        <ScrollViewer Grid.Row="1" Padding="16,0,16,8">
+          <StackPanel Spacing="4">
+
+            <TextBlock Classes="settings-label" Text="Terminal command" />
+            <TextBox Text="{Binding TerminalCommand}" />
+
+            <TextBlock Classes="settings-label" Text="Global default CLI args" />
+            <TextBox Text="{Binding GlobalDefaultArgs}" Watermark="e.g. --model opus" />
+
+            <TextBlock Classes="settings-label" Text="Global system prompt (appended)" />
+            <TextBox Text="{Binding GlobalSystemPrompt}" AcceptsReturn="True" Height="72"
+                     TextWrapping="Wrap" />
+
+            <CheckBox Content="Launch on OS startup" IsChecked="{Binding LaunchOnStartup}"
+                      Margin="0,10,0,0" />
+            <CheckBox Content="Close dashboard after launching" IsChecked="{Binding CloseOnLaunch}" />
+
+            <TextBlock Classes="settings-label" Text="Theme" />
+            <ComboBox ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding Theme}"
+                      HorizontalAlignment="Stretch" />
+
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer: Cancel + Save -->
+        <Border Grid.Row="2" Padding="12,10"
+                Background="{DynamicResource CcSurfaceMuted}"
+                BorderBrush="{DynamicResource CcBorderFaint}"
+                BorderThickness="0,1,0,0">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Cancel" Click="CloseSettings_Click" />
+            <Button Classes="settings-primary" Content="Save" Click="SaveSettings_Click" />
+          </StackPanel>
+        </Border>
+
+      </Grid>
+    </Border>
+  </Grid>
 </Window>
