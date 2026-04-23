@@ -4,6 +4,11 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <!-- Shipped exe and dll filename. Internal CLR namespaces stay CcLauncher.App
+         to avoid a broad rename; only consumers of avares:// URIs and the
+         final binary name depend on this. -->
+    <AssemblyName>Claudini</AssemblyName>
+    <RootNamespace>CcLauncher.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- Baked into the exe's Win32 resource table so Explorer, taskbar pinning,
          and shortcut creation all use the Claudini icon. -->

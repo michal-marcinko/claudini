@@ -71,7 +71,7 @@ public partial class Dashboard : Window
             // Avalonia's Window.Icon only fills ICON_BIG on Win32; the taskbar reads
             // ICON_SMALL, so we send WM_SETICON directly for both slots. See
             // WindowsTaskbarIcon for the full rationale.
-            WindowsTaskbarIcon.Apply(this, "avares://CcLauncher.App/Assets/claudini.ico");
+            WindowsTaskbarIcon.Apply(this, "avares://Claudini/Assets/claudini.ico");
 
             _vm.Refresh();
             _watcher ??= new ProjectsFileWatcher(
