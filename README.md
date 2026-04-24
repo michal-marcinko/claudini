@@ -84,12 +84,16 @@ Two details worth calling out for anyone reading the code:
 
 No dates, ordered roughly by impact.
 
-- **Cross-platform.** Finish the macOS and Linux paths. Tray icon pipeline, terminal selection, install/package scripts, and a real test pass on each OS.
+- **Cross-platform.** Finish the macOS and Linux paths. Tray icon pipeline, terminal selection, install/package scripts, and a real test pass on each OS. macOS should use a menubar app model rather than a window-that-pops-from-the-Dock.
 - **Peer-to-peer session sync.** Move a session from laptop to desktop without copying jsonls by hand. The hard part isn't the transport (Tailscale drop, mDNS + HTTP, or a small relay); it's path remapping between machines (the same project has a different cwd on each device) and conflict resolution when both sides edited the session.
 - **Global hotkey.** `Ctrl+Alt+Space` or similar to open the dashboard from anywhere without reaching for the tray.
 - **Search.** Filter projects and sessions by prompt text. Scrolling stops working once you have a few hundred sessions.
 - **Keyboard nav.** Arrow keys between rows, Enter to launch, `F` to favourite, `/` to focus search.
 - **Session preview.** Hover or expand to read the last few messages before launching, so you pick the right session the first time.
+- **Live "running" indicator.** Show which sessions currently have a claude process attached to their jsonl, so you can tell at a glance whether a session is already open in another terminal before you spawn a second one.
+- **Project groups / tags.** Tag projects with arbitrary labels (work, learning, archived). Combined with search, this is the answer to a 50+ project dashboard.
+- **Session export.** A row-level action that writes the session transcript to a markdown file. Claude Code's `/export` covers this from inside a session; having it on the dashboard skips the launch-just-to-export step.
+- **Drag to reorder favourites.** Manual ordering within the Favourites section, beyond the default by-recency sort.
 - **Auto-update.** Poll the GitHub releases feed and surface an in-tray nudge when a new version ships.
 
 Open to suggestions at [issues](https://github.com/michal-marcinko/claudini/issues).
