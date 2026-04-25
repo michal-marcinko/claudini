@@ -363,7 +363,11 @@
           <StackPanel Spacing="4">
 
             <TextBlock Classes="settings-label" Text="Terminal command" />
-            <TextBox Text="{Binding TerminalCommand}" />
+            <TextBox Text="{Binding TerminalCommand}"
+                     Watermark="wt  ·  powershell  ·  pwsh  ·  cmd  ·  or full path to an exe" />
+            <TextBlock Foreground="{DynamicResource CcTextSecondary}" FontSize="11"
+                       Text="powershell loads your $PROFILE so custom functions / aliases are available."
+                       Margin="0,2,0,0" />
 
             <TextBlock Classes="settings-label" Text="Global default CLI args" />
             <TextBox Text="{Binding GlobalDefaultArgs}" Watermark="e.g. --model opus" />
