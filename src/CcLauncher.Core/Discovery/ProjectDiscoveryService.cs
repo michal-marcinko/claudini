@@ -39,9 +39,14 @@ public sealed class ProjectDiscoveryService : IProjectDiscoveryService
 
         foreach (var jsonl in Directory.EnumerateFiles(projDir, "*.jsonl"))
         {
+            // Be permissive: any of these can fire when claude is actively writing to
+            // a jsonl while we scan. We'd rather skip a single transient session than
+            // crash the dashboard the moment a terminal window closes.
             try { sessions.Add(_reader.Read(jsonl)); }
-            catch (IOException)   { /* skip corrupt */ }
-            catch (JsonException) { /* skip corrupt */ }
+            catch (IOException)                { /* sharing violation, partial write, missing */ }
+            catch (UnauthorizedAccessException) { /* file briefly inaccessible during flush */ }
+            catch (JsonException)              { /* corrupt or mid-write json */ }
+            catch (NotSupportedException)      { /* malformed path */ }
         }
 
         var cwd = sessions.Count > 0

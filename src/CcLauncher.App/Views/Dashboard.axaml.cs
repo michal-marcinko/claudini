@@ -24,6 +24,19 @@ public partial class Dashboard : Window
     /// <summary>Signals that a real shutdown is in progress — the next Close is allowed to go through.</summary>
     public void PrepareShutdown() => _shuttingDown = true;
 
+    // The file watcher fires every time a jsonl is written to or closed by claude.
+    // If a refresh races a flush-on-exit (sharing-violation, partial write, missing
+    // dir), an unhandled exception on the UI thread takes the whole app down. Wrap
+    // every refresh — startup, watcher tick, post-action — in a soft catch + log.
+    private void SafeRefresh()
+    {
+        try { _vm.Refresh(); }
+        catch (System.Exception ex)
+        {
+            CcLauncher.Core.Logging.FileLog.Error("Refresh failed (recovered)", ex);
+        }
+    }
+
     public Dashboard()
     {
         AvaloniaXamlLoader.Load(this);
@@ -73,10 +86,10 @@ public partial class Dashboard : Window
             // WindowsTaskbarIcon for the full rationale.
             WindowsTaskbarIcon.Apply(this, "avares://Claudini/Assets/claudini.ico");
 
-            _vm.Refresh();
+            SafeRefresh();
             _watcher ??= new ProjectsFileWatcher(
                 CcLauncher.Core.Paths.PlatformPaths.ClaudeProjectsDir(),
-                () => Avalonia.Threading.Dispatcher.UIThread.Post(_vm.Refresh));
+                () => Avalonia.Threading.Dispatcher.UIThread.Post(SafeRefresh));
         };
         Closed += (_, _) => { _watcher?.Dispose(); _watcher = null; };
     }
