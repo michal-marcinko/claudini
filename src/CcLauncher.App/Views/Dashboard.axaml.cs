@@ -11,7 +11,6 @@ public partial class Dashboard : Window
 {
     private readonly DashboardViewModel _vm;
     private SettingsViewModel _settingsVm;
-    private ProjectsFileWatcher? _watcher;
 
     // Must match ExtendClientAreaTitleBarHeightHint in Dashboard.axaml. Empty clicks
     // in the top strip start a native window drag via BeginMoveDrag.
@@ -86,12 +85,16 @@ public partial class Dashboard : Window
             // WindowsTaskbarIcon for the full rationale.
             WindowsTaskbarIcon.Apply(this, "avares://Claudini/Assets/claudini.ico");
 
+            // Refresh on every dashboard show. We used to also run a FileSystemWatcher
+            // on ~/.claude/projects/ that pushed Refresh ticks while the dashboard was
+            // hidden, but that was implicated in a CLR fatal (0x80131506) when the user
+            // closed a launched terminal -- presumably some interaction between the
+            // watcher's native I/O completion ports and the jsonl flush-on-claude-exit.
+            // Keeping refresh tied to Opened is simpler and means the dashboard is
+            // always fresh when you open it; trade-off is you have to close+reopen to
+            // see new sessions if the dashboard is already up.
             SafeRefresh();
-            _watcher ??= new ProjectsFileWatcher(
-                CcLauncher.Core.Paths.PlatformPaths.ClaudeProjectsDir(),
-                () => Avalonia.Threading.Dispatcher.UIThread.Post(SafeRefresh));
         };
-        Closed += (_, _) => { _watcher?.Dispose(); _watcher = null; };
     }
 
     private void OpenSettings_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

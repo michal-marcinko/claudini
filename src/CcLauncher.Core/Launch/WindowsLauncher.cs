@@ -27,7 +27,10 @@ public sealed class WindowsLauncher : ILauncher
         var resolved = $"{psi.FileName} {string.Join(' ', psi.ArgumentList.Select(Quote))}";
         try
         {
-            var p = Process.Start(psi);
+            // `using` so the Process object's SafeHandle is released deterministically
+            // here rather than later by the GC finalizer thread. The child process
+            // keeps running because UseShellExecute=true doesn't tie it to our handle.
+            using var p = Process.Start(psi);
             return new LaunchResult(Success: true, Pid: p?.Id, Error: null, ResolvedCommandLine: resolved);
         }
         catch (Exception ex)
