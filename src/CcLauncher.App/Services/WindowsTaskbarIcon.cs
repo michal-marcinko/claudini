@@ -30,12 +30,8 @@ internal static class WindowsTaskbarIcon
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-    [DllImport("user32.dll")]
-    private static extern bool DestroyIcon(IntPtr hIcon);
-
-    // The dashboard Opened handler fires every tray toggle — without cleanup, each
-    // show would LoadImage two fresh HICONs and leak the previous pair. USER
-    // object handles are capped at ~10,000 per process.
+    // Tracked only for diagnostics — see the long comment in Apply for why we
+    // don't DestroyIcon. The OS releases all USER handles on process exit.
     private static IntPtr _lastSmall;
     private static IntPtr _lastBig;
 
@@ -88,12 +84,25 @@ internal static class WindowsTaskbarIcon
         if (hSmall != IntPtr.Zero) SendMessage(handle, WM_SETICON, (IntPtr)ICON_SMALL, hSmall);
         if (hBig   != IntPtr.Zero) SendMessage(handle, WM_SETICON, (IntPtr)ICON_BIG,   hBig);
 
-        // Free the prior pair AFTER the new ones are installed — destroying a
-        // handle that's still referenced by a window is safe on Windows (USER
-        // reference-counts the icon), but we only want to release it once the
-        // window is definitely using the replacement.
-        if (_lastSmall != IntPtr.Zero) DestroyIcon(_lastSmall);
-        if (_lastBig   != IntPtr.Zero) DestroyIcon(_lastBig);
+        // DO NOT call DestroyIcon on the previous handles here.
+        //
+        // Earlier I tried freeing _lastSmall / _lastBig at this point. That caused
+        // a CLR fatal 0x80131506 (COR_E_EXECUTIONENGINE) crash some seconds-to-
+        // minutes later. Two reasons:
+        //
+        // 1. The OS keeps references to icon handles in caches OUTSIDE the
+        //    window's HWND — taskbar thumbnails, alt-tab thumbnails, jump-lists.
+        //    DestroyIcon on a handle they still hold causes use-after-free.
+        // 2. The very first time Apply runs, _lastSmall / _lastBig are zero so
+        //    nothing happens. On the second run they're our previous LoadImage
+        //    handles — fine to destroy. But Avalonia's Window.Icon=... in XAML
+        //    has already populated the slots once; SendMessage will replace
+        //    those Avalonia-owned handles, and if we ever tracked them too we'd
+        //    free Avalonia's state.
+        //
+        // The leak is bounded: 2 USER handles per dashboard open. Far below the
+        // 10,000-per-process USER limit. The handles are released by the OS on
+        // process exit anyway.
         _lastSmall = hSmall;
         _lastBig   = hBig;
 
