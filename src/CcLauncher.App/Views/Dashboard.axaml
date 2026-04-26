@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:CcLauncher.App.ViewModels"
+        xmlns:svc="clr-namespace:CcLauncher.App.Services"
         x:Class="CcLauncher.App.Views.Dashboard"
         x:DataType="vm:DashboardViewModel"
         Width="460" Height="640"
@@ -362,12 +363,25 @@
         <ScrollViewer Grid.Row="1" Padding="16,0,16,8">
           <StackPanel Spacing="4">
 
-            <TextBlock Classes="settings-label" Text="Terminal command" />
-            <TextBox Text="{Binding TerminalCommand}"
-                     Watermark="wt  ·  powershell  ·  pwsh  ·  cmd  ·  or full path to an exe" />
+            <TextBlock Classes="settings-label" Text="Terminal" />
+            <ComboBox ItemsSource="{Binding TerminalProfiles}"
+                      SelectedItem="{Binding SelectedTerminalProfile}"
+                      HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate DataType="svc:TerminalProfile">
+                  <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <TextBlock Grid.Column="0" Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="not installed"
+                               IsVisible="{Binding !IsAvailable}"
+                               Foreground="{DynamicResource CcTextSecondary}"
+                               FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
             <TextBlock Foreground="{DynamicResource CcTextSecondary}" FontSize="11"
-                       Text="powershell loads your $PROFILE so custom functions / aliases are available."
-                       Margin="0,2,0,0" />
+                       Text="PowerShell variants load your $PROFILE so custom functions and aliases are available."
+                       Margin="0,2,0,0" TextWrapping="Wrap" />
 
             <TextBlock Classes="settings-label" Text="Global default CLI args" />
             <TextBox Text="{Binding GlobalDefaultArgs}" Watermark="e.g. --model opus" />

@@ -20,7 +20,9 @@ public static class AppServices
             {
                 _config ??= ConfigStore.OpenFile(
                     PlatformPaths.DatabaseFile(),
-                    LauncherFactory.DefaultTerminalCommand());
+                    System.OperatingSystem.IsWindows()
+                        ? TerminalDetector.DetectDefaultCommand()
+                        : LauncherFactory.DefaultTerminalCommand());
                 return _config;
             }
         }
